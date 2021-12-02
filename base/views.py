@@ -1,9 +1,33 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.db.models import Q
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from .models import Room, Topic
 from .forms import RoomForm
 
 # Create your views here.
+
+def loginPage(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, '유저명이 존재하지 않습니다.')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, '유저명 혹은 비밀번호가 일치하지 않습니다.')
+
+    context = {}
+    return render(request, 'base/login_register.html', context)
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
@@ -22,7 +46,7 @@ def home(request):
         'rooms': rooms,
         'topics': topics,
         'room_count': room_count,
-        'q' : q
+        'q': q
     }
     return render(request, 'base/home.html', context)
 
