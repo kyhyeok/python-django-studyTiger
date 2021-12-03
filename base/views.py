@@ -69,10 +69,13 @@ def home(request):
 
     topics = Topic.objects.all()
 
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
+
     context = {
         'rooms': rooms,
         'topics': topics,
         'room_count': room_count,
+        'room_messages': room_messages,
         'q': q
     }
     return render(request, 'base/home.html', context)
